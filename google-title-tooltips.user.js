@@ -2,6 +2,7 @@
 // @name          Google Title Tooltips
 // @namespace     https://github.com/ohdeerdog/
 // @version       0.1
+// @downloadURL   https://github.com/ohdeerdog/tampermonkey/raw/master/google-title-tooltips.user.js
 // @description   Applies original Google search result titles to result links as title attributes
 // @author        ohdeerdog
 // @include       *://*.google.tld/*
