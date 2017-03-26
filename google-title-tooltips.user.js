@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name          Google Title Tooltips
 // @namespace     https://github.com/ohdeerdog/
-// @version       0.1
+// @version       0.2
 // @downloadURL   https://github.com/ohdeerdog/tampermonkey/raw/master/google-title-tooltips.user.js
-// @description   Applies original Google search result titles to result links as title attributes
+// @description   Applies original page titles to Google search results with truncated names
 // @author        ohdeerdog
 // @include       *://*.google.tld/*
 // @run-at        document-body
@@ -12,39 +12,46 @@
 // ==/UserScript==
 
 (function() {
-  function apply_titles() {
-    let links = document.querySelectorAll('#rso .g h3.r a');
-    for (let link of links) {
-      let request = new Request('https://urltitle.herokuapp.com/', {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({ url: link.href }),
-      });
+  document.addEventListener('mouseover', event => {
+    let target = event.target;
+    let parent = target.parentElement;
 
-      fetch(request).then(response => {
-        if (response.status === 200) {
-          response.json().then(data => {
-            if (data.title.length > 0) {
-              link.setAttribute('title', data.title);
-            }
-          });
-        }
-      });
-    }
-  }
+    if (
+      target.tagName === 'A' &&
+      parent.tagName === 'H3' &&
+      parent.classList.contains('r') &&
+      target.innerText.indexOf('...') > 0 &&
+      target.dataset.hovered === undefined
+    ) {
+      target.dataset.hovered = true;
+      let cached_title = sessionStorage.getItem('url-title-' + target.href);
+      if (!cached_title) {
+        let request = new Request('https://urltitle.herokuapp.com/', {
+          method: 'POST',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({ url: target.href }),
+        });
 
-  const observer = new MutationObserver(mutations => {
-    for (let mutation of mutations) {
-      if (mutation.target.id === 'search' && mutation.addedNodes.length === 2) {
-        apply_titles();
+        fetch(request).then(response => {
+          if (response.status === 200) {
+            response.json().then(data => {
+              target.setAttribute('title', data.title);
+              sessionStorage.setItem('url-title-' + target.href, data.title);
+              let cloned = target.cloneNode(true);
+              target.style.display = 'none';
+              parent.appendChild(cloned);
+              setTimeout(() => {
+                parent.removeChild(cloned);
+                target.removeAttribute('style');
+              });
+            });
+          }
+        });
+      } else {
+        target.setAttribute('title', cached_title);
       }
     }
   });
-
-  var config = { childList: true, subtree: true };
-
-  document.addEventListener('DOMContentLoaded', apply_titles);
-  observer.observe(document.body, config);
 })();
