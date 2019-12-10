@@ -2,7 +2,7 @@
 // @name          Remove editability on click from trello card details
 // @namespace     https://github.com/danbozaru
 // @version       1.1.1
-// @downloadURL   https://github.com/danbozaru/tampermonkey/blob/master/remove-trello-click-to-edit.user.js
+// @downloadURL   https://raw.githubusercontent.com/danbozaru/tampermonkey/master/remove-trello-click-to-edit.user.js
 // @description   Removes click to edit behavior from card detail descriptions within modals.
 // @author        danbozaru
 // @include       https://trello.com/*
