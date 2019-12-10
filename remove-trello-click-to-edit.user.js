@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name          Remove editability on click from trello card details
 // @namespace     https://github.com/danbozaru
-// @version       1.0.0
+// @version       1.1.0
 // @downloadURL   https://github.com/danbozaru/tampermonkey/blob/master/remove-trello-click-to-edit.user.js
-// @description   Removes click to edit behacvior from card detail descriptions within modals.
+// @description   Removes click to edit behavior from card detail descriptions within modals.
 // @author        danbozaru
 // @include       https://trello.com/*
 // @run-at        document-start
@@ -59,6 +59,9 @@
     win.ready = ready;
 })(this);
 
-window.ready('.window-module .editable', node => {
-    node.classList.remove('editable');
+window.ready('.current.markeddown', node => {
+    node.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
 });
