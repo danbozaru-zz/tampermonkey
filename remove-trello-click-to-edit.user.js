@@ -61,8 +61,10 @@
 
 window.ready('.current.markeddown', node => {
     node.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
+        if(event.target.tagName !== 'A') {
+            event.preventDefault();
+            event.stopPropagation();
+        }
     });
     node.style.cursor = 'auto';
 });
