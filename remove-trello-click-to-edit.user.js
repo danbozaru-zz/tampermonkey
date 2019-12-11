@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Remove editability on click from trello card details
 // @namespace     https://github.com/danbozaru
-// @version       1.1.2
+// @version       1.1.3
 // @downloadURL   https://raw.githubusercontent.com/danbozaru/tampermonkey/master/remove-trello-click-to-edit.user.js
 // @description   Removes click to edit behavior from card detail descriptions within modals.
 // @author        danbozaru
@@ -10,61 +10,46 @@
 // @grant         GM_log
 // ==/UserScript==
 
-(function(win) {
-    'use strict';
+((window) => {
+    const listeners = [];
+    const doc = window.document;
+    const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    let observer;
 
-    var listeners = [],
-        doc = win.document,
-        MutationObserver = win.MutationObserver || win.WebKitMutationObserver,
-        observer;
-
-    function ready(selector, fn) {
-        // Store the selector and callback to be monitored
+    const ready = (selector, fn) => {
         listeners.push({
             selector: selector,
             fn: fn
         });
         if (!observer) {
-            // Watch for changes in the document
             observer = new MutationObserver(check);
             observer.observe(doc.documentElement, {
                 childList: true,
                 subtree: true
             });
         }
-        // Check if the element is currently in the DOM
         check();
     }
 
-    function check() {
-        // Check the DOM for elements matching a stored selector
-        for (var i = 0, len = listeners.length, listener, elements; i < len; i++) {
+    const check = () => {
+        for (var i = 0, listenersLength = listeners.length, listener, elements; i < listenersLength; i++) {
             listener = listeners[i];
-            // Query for elements matching the specified selector
             elements = doc.querySelectorAll(listener.selector);
-            for (var j = 0, jLen = elements.length, element; j < jLen; j++) {
+            for (var j = 0, elementsLength = elements.length, element; j < elementsLength; j++) {
                 element = elements[j];
-                // Make sure the callback isn't invoked with the
-                // same element more than once
                 if (!element.ready) {
                     element.ready = true;
-                    // Invoke the callback with the element
                     listener.fn.call(element, element);
                 }
             }
         }
     }
-
-    // Expose `ready`
-    win.ready = ready;
+    window.ready = ready;
 })(this);
 
 window.ready('.current.markeddown', node => {
     node.addEventListener('click', event => {
-        if(event.target.tagName !== 'A') {
-            event.preventDefault();
-            event.stopPropagation();
-        }
+        event.stopPropagation();
     });
     node.style.cursor = 'auto';
 });
